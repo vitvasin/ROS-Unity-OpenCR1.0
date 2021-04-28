@@ -92,17 +92,6 @@ if __name__ == '__main__':
     window_component()
     rospy.init_node('command_publisher')
     pub = rospy.Publisher("/head_waist_motor_cmd",String,queue_size=10)
-    
-
-   
- #   while not rospy.is_shutdown():
-        
-  #      rospy.loginfo(msg)
-  #      pub.publish(msg)
-  #      rate.sleep()
-  #      
-    
-    
     window.mainloop() 
     rospy.loginfo("Node was stopped")
 

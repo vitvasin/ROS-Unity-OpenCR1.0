@@ -16,10 +16,10 @@ def serial_connection():
     rospy.init_node('serial_command_push')
     sub = rospy.Subscriber('/head_waist_motor_cmd',String, callback_receive_cmd) ## listen to same TOPIC
     
-    rate = rospy.Rate(100) #100 Hz
+    #rate = rospy.Rate(100) #100 Hz
 
     while not rospy.is_shutdown():
-        opencr = serial.Serial('/dev/ttyACM0', 9600)
+        opencr = serial.Serial('/dev/ttyACM0', 57600)
         rospy.loginfo(opencr.name + ' Serial_connected')
         x = True
         while opencr.isOpen():
@@ -29,8 +29,8 @@ def serial_connection():
                 pre_cmd = pass_cmd
 
             
-            #time.sleep()
-            rate.sleep()
+            time.sleep(0.008) # 125 Hz
+            #rate.sleep()
         opencr.close()
 
     rospy.spin()

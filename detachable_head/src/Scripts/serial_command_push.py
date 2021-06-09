@@ -9,6 +9,7 @@ pre_cmd =""
 def callback_receive_cmd(msg):
     global pass_cmd
     pass_cmd = msg.data +'\n'
+    rospy.loginfo('Received : ' + pass_cmd)
 
 
 def serial_connection():

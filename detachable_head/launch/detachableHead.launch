@@ -53,7 +53,7 @@ limitations under the License.
 
 	<node name="file_server" pkg="file_server" type="file_server" output="screen" />
 	<node name="command_publisher" pkg="detachable_head" type="command_publisher.py" output="screen" />
-	<<!-- node name="serial_command_push" pkg="detachable_head" type="serial_command_push.py" output="screen" /-->
+	<!-- node name="serial_command_push" pkg="detachable_head" type="serial_command_push.py" output="screen" /-->
 	<node name="serial_node" pkg="rosserial_python" type="serial_node.py">
 		<param name="port" value ="/dev/ttyACM0"/>
 		<param name="baud" value ="57600"/>

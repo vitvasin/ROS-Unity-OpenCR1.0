@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!--
+© Siemens AG, 2017-2019
+Author: Dr. Martin Bischoff (martin.bischoff@siemens.com)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+<http://www.apache.org/licenses/LICENSE-2.0>.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<launch>
+	
+	<node name="topic_hub" pkg="detachable_head" type="Topic_hub.py" output="screen" />
+	<node name="unity_Hand_Connect2" pkg="detachable_head" type="unity_Hand_connect2.py" output="screen" />
+	<node name="Gripper" pkg="detachable_head" type="Gripper_Receiver.py" output="screen" />
+	<node name="Head_repos" pkg="detachable_head" type="HeadReposition.py" output="screen" />
+	
+	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+		<arg name="port" value="9090" />
+	</include>
+
+	<node name="file_server" pkg="file_server" type="file_server" output="screen" />
+	<node name="serial_node1" pkg="rosserial_python" type="serial_node.py" output="screen">
+		<param name="port" value ="/dev/ttyACM0"/>
+		<param name="baud" value ="115200"/>
+	</node>
+	<!-- launch video stream -->
+   <include file="$(find video_stream_opencv)/launch/camera.launch" >
+   		<!-- node name and ros graph name -->
+	  	<arg name="camera_name" value="webcam2" />
+	  	<!-- means video device 0, /dev/video0 -->
+	  	<arg name="video_stream_provider" value="0" />
+	  	<!-- set camera fps to (if the device allows) -->
+	  	<arg name="set_camera_fps" value="30"/>
+      	<!-- set buffer queue size of frame capturing to (1 means we want the latest frame only) -->
+      	<!-- <arg name="buffer_queue_size" value="100" /> -->
+	  	<!-- throttling the querying of frames to -->
+	  	<arg name="fps" value="30" />
+	  	<!-- setting frame_id -->
+	  	<arg name="frame_id" value="webcam_optical_frame" />
+	  	<!-- camera info loading, take care as it needs the "file:///" at the start , e.g.:
+	  	"file:///$(find your_camera_package)/config/your_camera.yaml" -->
+	  	<arg name="camera_info_url" value="" />
+	  	<!-- flip the image horizontally (mirror it) -->
+	  	<arg name="flip_horizontal" value="true" />
+	  	<!-- flip the image vertically -->
+	  	<arg name="flip_vertical" value="true" />
+		<!-- force width and height, 0 means no forcing -->
+	    <!--
+	    <arg name="width" value="640"/>
+	    <arg name="height" value="480"/>
+		-->
+	  	<!-- visualize on an image_view window the stream generated -->
+	  	<arg name="visualize" value="true" />
+   </include>
+
+   	<!--node name="command_publisher" pkg="detachable_head" type="command_publisher.py" output="screen" /-->
+
+	<!--node name="unity_hand_connect" pkg="detachable_head" type="unity_Hand_connect.py" output="screen" /-->
+</launch>

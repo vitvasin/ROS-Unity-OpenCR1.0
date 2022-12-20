@@ -16,8 +16,10 @@ limitations under the License.
 
 <launch>
 	
-	<node name="unity_Hand_Connect2" pkg="detachable_head" type="unity_Hand_connect2.py" output="screen" />
-	<!--node name="Gripper" pkg="detachable_head" type="Gripper_Receiver.py" output="screen" /-->
+	<node name="Hand_Connect" pkg="detachable_head" type="FaceVector_Hand.py" output="screen" />
+	<!-- node name="Gripper" pkg="detachable_head" type="Gripper_Receiver.py" output="screen" /-->
+	<node name="FaceVector_cal" pkg="detachable_head" type="Face_vec_Sub.py" output="screen" />
+	
 	
 	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
 		<arg name="port" value="9090" />
@@ -37,7 +39,7 @@ limitations under the License.
 	  	<!-- set camera fps to (if the device allows) -->
 	  	<arg name="set_camera_fps" value="30"/>
       	<!-- set buffer queue size of frame capturing to (1 means we want the latest frame only) -->
-      	<arg name="buffer_queue_size" value="1" /> 
+      	<arg name="buffer_queue_size" value="10" /> 
 	  	<!-- throttling the querying of frames to -->
 	  	<arg name="fps" value="30" />
 	  	<!-- setting frame_id -->
@@ -48,7 +50,7 @@ limitations under the License.
 	  	<!-- flip the image horizontally (mirror it) -->
 	  	<arg name="flip_horizontal" value="true" />
 	  	<!-- flip the image vertically -->
-	  	<arg name="flip_vertical" value="false" />
+	  	<arg name="flip_vertical" value="true" />
 		<!-- force width and height, 0 means no forcing -->
 	    <!--
 	    <arg name="width" value="640"/>

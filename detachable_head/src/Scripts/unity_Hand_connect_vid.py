@@ -34,14 +34,14 @@ def callback(array):
     ##
     #x = int(array.data[0])
     x= array.data[0]
-    if x>270: x= 270
-    if x<-270: x= -270
+    if x>350: x= 350
+    if x<-350: x= -350
 
 
     #y = int(array.data[1])
     y= array.data[1]
-    if y>300: y= 300
-    if y<100: y= 100
+    if y>350: y= 350
+    if y<200: y= 200
     #z = int(array.data[2])
     z = array.data[2]
     if z>-120: z= -120
@@ -55,9 +55,9 @@ def callback(array):
         
         #coord_list = [x, z, y,-170,0,-180] #x,y,z correct
         #coord_list = [x, z, y,-180,0,-180] #x,y,z correct
-        coord_list = [x, z, 280,0,0,0] #x,y,z correct
-        #rospy.loginfo('Received:' + str(coord_list))
-        mycobot.send_coords(coord_list, 80, 1)
+        coord_list = [x, z, y,0,0,0] #x,y,z correct
+        #rospy.loginfo('Received_FROM_CONTROLLER:' + str(coord_list))
+        mycobot.send_coords(coord_list, 65, 1)
         #mycobot.sync_send_coords(coord_list,80,1,7)
         
     else :
@@ -66,7 +66,7 @@ def callback(array):
             mes = Float32MultiArray()
             mes.data = currentCoord
             pub.publish(mes)
-            rospy.loginfo(mes.data)
+            #rospy.loginfo(mes.data)
     #
     #mycobot.send_coords(coord_list, 80, 0)
     #mycobot.sync_send_coords(coord_list, 50, 1, timeout=7)
@@ -77,19 +77,22 @@ def callback(array):
 def initialize_gripper():
     #mycobot.set_gripper_ini()
     #mycobot.set_speed(100)
+    #mycobot.set_gripper_ini()
     mycobot.set_encoder(8,1500)
-    time.sleep(1)
-    mycobot.set_encoder(8,800)
-    time.sleep(1)
+    time.sleep(2)
+    mycobot.set_encoder(8,1000)
+    time.sleep(2)
     mycobot.set_encoder(8,1500)
-    time.sleep(1)
+    time.sleep(2)
 
 def mycobot_listenner() :
     global mycobot, pub, subco
 
     subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
     rospy.Subscriber('/grip_ind',Bool,callback_grip,queue_size=5)
+    rospy.Subscriber('/pad',Bool,callback_pad,queue_size=5)
     pub = rospy.Publisher('/mycobotCoords',Float32MultiArray,queue_size=1)
+
 
     
 
@@ -100,16 +103,56 @@ def callback_grip(input):
     y= input.data
 
     if y == False:
-        mycobot.set_encoder(8,1500)
+        mycobot.set_encoder(8,2000)
     if y== True:
         subco.unregister()
-        mycobot.set_encoder(8,1500)
-        grabat(x,z)          
+        mycobot.set_encoder(8,600)
+        #grabat(x,z)
+        #time.sleep(0.5)
+        #mycobot.set_encoder(8,1500) 
+                  
         subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
 
-    
+def callback_pad(input):
+    global old, mycobot, pub, subco, x,z
+    initCoord = []
+    pad= input.data
+    if pad == True or pad == False:
+        subco.unregister() 
+    ##    mycobot.send_angle(Angle.J5.value,30,50)
+    #    time.sleep(3)
+    #    mycobot.send_angle(Angle.J5.value,15,50)
+        
+        mycobot.jog_angle(4,1,10)
+        time.sleep(1)
+        mycobot.jog_stop()
+            
 
+        subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
 
+def callback_JogUP(input):
+    global old, mycobot, pub, subco, x,z
+    initCoord = []
+    pad= input.data
+    if pad == True or pad == False:
+        subco.unregister()
+        while 1:
+            mycobot.jog_angle(5,0,50)
+            A= mycobot.get_angles()
+            if A[4] > 15: 
+                mycobot.jog_stop()
+                break
+
+        subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
+
+def callback_JogDown(input):
+    global old, mycobot, pub, subco, x,z
+    initCoord = []
+    pad= input.data
+    if pad == True or pad == False:
+        subco.unregister()
+        mycobot.jog_angle(5,1,50)
+        subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
 
 def grabat(X,Z):
    # if os.path.exists('/dev/Mycobot') != 1:
@@ -119,6 +162,7 @@ def grabat(X,Z):
   #      mycobot.set_color(255, 255, 0)
    #     return
     #Z+=17
+
     if Z>-120: Z= -120
     if Z<-280: Z= -280
     #X+=10

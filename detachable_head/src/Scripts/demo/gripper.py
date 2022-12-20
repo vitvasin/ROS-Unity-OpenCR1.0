@@ -21,11 +21,11 @@ def gripper_test(mc):
     # is no need to change the method.
     #mc.set_gripper_ini()
 
-    mc.set_encoder(7, 2800)
+    mc.set_encoder(7, 2000)
     time.sleep(2)
-    mc.set_encoder(7, 1500)
+    mc.set_encoder(7, 1300)
     time.sleep(2)
-    mc.set_encoder(7, 2800)
+    mc.set_encoder(7, 2000)
     time.sleep(2)
     # set_gripper_value has some bug, just can close.
     #mc.set_gripper_value(100, 70)

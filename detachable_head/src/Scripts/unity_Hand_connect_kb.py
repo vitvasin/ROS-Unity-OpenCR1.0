@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+#Import library
 import time, random, subprocess, rospy, os, threading
 from tkinter import FALSE, Y
 from xmlrpc.client import Boolean, boolean
@@ -11,6 +11,7 @@ from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Quaternion
 import tf
 #import serial
+Ar= 120
 grip_F = False
 grip_op = 2000
 grip_cl = 850

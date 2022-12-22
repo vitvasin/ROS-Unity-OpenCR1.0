@@ -11,7 +11,7 @@ Additional Repos
 USB connection (example) // adjust the parameter to the current environment
 - Camera test with webcam  >>>> /dev/video0 
 - OPENCR1.0 (Controller) >>>>> /dev/ttyACM0 baudrate 9600, 57600, 115200
-
+- MyCobot >>>>> /dev/Mycobot >>>> setup the fix device name (bind with product ID, address, etc. ) in/usr/lib/udev/rules.d > or make new one
 
 To start nodes demo RUN >>>> roslaunch detachable_head detachable_head.launch
 

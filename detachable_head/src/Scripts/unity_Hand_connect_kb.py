@@ -128,6 +128,57 @@ def gripTrig():
     elif grip_F == True:
         mycobot.set_encoder(8,grip_cl)
         grip_F = False
+        
+def limit_input(x,y): #(not tested yet) limited the value of x,y to saturate in 280 radius >> 
+    radius = (x ** 2 + y **2 ) ** 0.5
+    if radius > 280:
+        x = 280 * x / radius
+        y = 280 * y / radius
+    return x,y
+'''
+def limit_input_sphere(x, y, z, roll, pitch, yaw):
+  # Calculate the radius of the point (x, y, z)
+  radius = (x ** 2 + y ** 2 + z ** 2) ** 0.5
+
+  # If the radius is greater than 280, scale the values of x, y, and z
+  if radius > 280:
+    x = 280 * x / radius
+    y = 280 * y / radius
+    z = 280 * z / radius
+
+  # Check the limits of the joint positions and orientations
+  if roll < MIN_ROLL:
+    roll = MIN_ROLL
+  elif roll > MAX_ROLL:
+    roll = MAX_ROLL
+  if pitch < MIN_PITCH:
+    pitch = MIN_PITCH
+  elif pitch > MAX_PITCH:
+    pitch = MAX_PITCH
+  if yaw < MIN_YAW:
+    yaw = MIN_YAW
+  elif yaw > MAX_YAW:
+    yaw = MAX_YAW
+
+  # Check the kinematic constraints of the arm
+  if not is_valid_pose(x, y, z, roll, pitch, yaw):
+    # If the pose is not valid, adjust the values of x, y, and z to the nearest valid values
+    x = min(max(x, MIN_X), MAX_X)
+    y = min(max(y, MIN_Y), MAX_Y)
+    z = min(max(z, MIN_Z), MAX_Z)
+
+  # Return the modified values of x, y, z, and the fixed radius of 280
+  return x, y, z, roll, pitch, yaw, 280
+'''
+
+def limit_input_sphere(x,y,z): #(not tested yet) limited the value of x,y,z to saturate in 280 radius >> 
+    radius = (x ** 2 + y **2 + z **2  ) ** 0.5
+    if radius > 280:
+        x = 280 * x / radius
+        y = 280 * y / radius
+        z = 280 * z / radius
+    return x,y,z
+
 
 def callback_kb(input):
     global old, mycobot, pub, subco, x,z, coord_list, XX,ZZ, YY

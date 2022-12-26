@@ -34,5 +34,4 @@ To start the demo nodes:
 2. Arm and keyboard control: roslaunch detachable_head Experiment_EMB_TRANF.launch
 3. Head, arm, and VIVE controller: roslaunch detachable_head DEMO.launch
 
-For more information about controller setup, see the Google doc at
-https://docs.google.com/document/d/17JUlJ-pTC5sRLx5VKVTQgaNw3UoYIy6Dms43cI3WPWk/edit?usp=sharing.
+For more information about controller setup, see https://github.com/vitvasin/DheadUnity_git

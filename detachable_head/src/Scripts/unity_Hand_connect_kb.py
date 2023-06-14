@@ -186,13 +186,13 @@ def callback_kb(input):
     key = input.data
     
     if key == 'left':
-        XX+=8
+        XX+=4
     elif key == 'right':
-        XX-=8
+        XX-=4
     elif key == 'up':
-        ZZ-=8
+        ZZ-=4
     elif key == 'down':
-        ZZ+=8
+        ZZ+=4
     elif key == '0':
         YY-=4
     elif key == '1':

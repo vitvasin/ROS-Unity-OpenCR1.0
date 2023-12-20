@@ -10,6 +10,7 @@ from std_msgs.msg import Float32MultiArray, Bool, Int16
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Quaternion
 import tf
+import math
 #import serial
 
 
@@ -33,6 +34,7 @@ def callback(array):
     #koko
     ##
     #x = int(array.data[0])
+    rospy.loginfo(array.data)
     x= array.data[0]
     if x>350: x= 350
     if x<-350: x= -350
@@ -66,7 +68,7 @@ def callback(array):
             mes = Float32MultiArray()
             mes.data = currentCoord
             pub.publish(mes)
-            #rospy.loginfo(mes.data)
+            #rospy.loginfo("current cord:" + str(mes.data))
     #
     #mycobot.send_coords(coord_list, 80, 0)
     #mycobot.sync_send_coords(coord_list, 50, 1, timeout=7)
@@ -93,6 +95,8 @@ def callback_embInput(tracker_input):
     #drive the robot
     mycobot.send_coords(coord_list, 100, 1)
     #rospy.loginfo('Received_FROM_CONTROLLER:' + str(coord_list))
+    current_cord = mycobot.get_coords()
+    rospy.loginfo("current cord:" + str(current_cord))
     
     
 def initialize_gripper():
@@ -111,15 +115,82 @@ def mycobot_listenner() :
 
     #subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
     emb_input=rospy.Subscriber('/embInput', Float32MultiArray, callback_embInput,queue_size=1)
-    rospy.Subscriber('/grip_ind',Bool,callback_grip,queue_size=5)
-    rospy.Subscriber('/pad',Bool,callback_pad,queue_size=5)
+    #rospy.Subscriber('/grip_ind',Bool,callback_grip,queue_size=5)
+    #rospy.Subscriber('/pad',Bool,callback_pad,queue_size=5)
+    #rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
     pub = rospy.Publisher('/mycobotCoords',Float32MultiArray,queue_size=1)
+    #Mycobot_Mapping_Position()
 
 
     
 
     rospy.spin()
+    
+def publish_messages(topic, message_type, rate, message_constructor):
+    """
+    Function to publish messages to a given topic at a specified rate.
 
+    :param topic: Topic name
+    :param message_type: ROS message type (e.g., std_msgs.msg.String)
+    :param rate: Publishing rate in Hz
+    :param message_constructor: A function to construct the message
+    """
+    publisher =  rospy.Publisher('/mycobotCoords',Float32MultiArray,queue_size=1)
+    rate = rospy.Rate(rate)
+
+    while not rospy.is_shutdown():
+        message = Mycobot_Mapping_Position() 
+        publisher.publish(message)
+        #rospy.loginfo(message)
+        rate.sleep()
+
+def Mycobot_Mapping_Position() :
+    global mycobot, pub, subco
+    Current_Coords = mycobot.get_coords()
+    x = Current_Coords[0]
+    y = Current_Coords[1]
+    z = Current_Coords[2]    
+    
+    return MAP_CAL(x,y)
+    
+def MAP_CAL(dx,dy):
+    #//data[0] = Position
+    #//data[1] = pressure level
+    # Define the pressure side
+    Pos =0
+    Plevel = 0
+    if dx > 0 and dy > 0:
+        Pos = 1 #UR
+    elif dx < 0 and dy > 0:
+        Pos = 2 #UL
+    elif dx < 0 and dy < 0:
+        Pos = 3 #LL
+    elif dx > 0 and dy < 0:
+        Pos = 4 #LR
+    
+    #Define pressure level
+    #calculate how far from the home pos int 3 level near, mid, far
+    
+    
+    r = math.sqrt(dx*dx + dy*dy)
+    
+    if r > 0 and r < 100:
+        Plevel = 1
+    elif r > 100 and r < 200 :
+        Plevel = 2
+    elif r > 200 and r < 300 :
+        Plevel = 3
+
+
+    out = Float32MultiArray()
+    
+    out.data = [Pos,Plevel]
+    #rospy.loginfo("info message")
+    #rospy.loginfo(out.data)
+    return  out
+
+
+''' 
 def callback_grip(input):
     global old, mycobot, pub, subco, x,z
     y= input.data
@@ -213,9 +284,11 @@ def grabat(X,Z):
     #rospy.loginfo('Received:' + str(coord_list))
     mycobot.send_coords(coord_list, 50, 1)
         
+'''
 
 def init_mycobot():
     global mycobot
+    reset = [0, 0, 0, 0, 0, 0]
     port = '/dev/Mycobot2'
     #mycobot = MyCobot('/dev/ttyUSB0')
     mycobot = MyCobot(port)
@@ -272,20 +345,40 @@ def thread_check_connection():
         if t_flag == True: break
         time.sleep(1)
 
+def shutdown_hook():
+    global mycobot, t_flag
+    rospy.loginfo("Shutting down MyCobot node...")
+    t_flag = True  # Signal to threads to stop
+    #mycobot.release_all_servos()  # Release servos
+    reset = [0, 0, 0, 0, 0, 0]
+    mycobot.send_angles(reset, 30)
+    mycobot.set_color(255, 0, 0)  # Optionally set color to indicate shutdown
+    rospy.loginfo("Shutdown complete.")
+
+
 if __name__ == '__main__':
     global mycobot, t_flag
     t_flag = False
     rospy.init_node('hand_node')
+    rospy.on_shutdown(shutdown_hook)  # Register shutdown hook
     rospy.loginfo('initialized arm node')
-    reset = [0, 0, 0, 0, 0, 0]
+    
     t1= threading.Thread(target=thread_check_connection, name = 't1')
+    
     checkConnection()
     init_mycobot()
     initialize_gripper()
+    #t2 = threading.Thread(target=publish_messages, args=('/mycobotCoords',Mycobot_Mapping_Position() , 10,Float32MultiArray ))
+    # Start the threads
+    #t2.start()
+    # Keep the main thread alive
+    #t2.join()
     t1.start() # start checking serial thread
     mycobot_listenner() 
+    ''' 
     t_flag = True # execute when leave the program
-    mycobot.send_angles(reset, 30)
-    mycobot.set_color(255, 0, 0)
+    
+    mycobot.set_color(255, 0, 0) 
+    '''
 
     

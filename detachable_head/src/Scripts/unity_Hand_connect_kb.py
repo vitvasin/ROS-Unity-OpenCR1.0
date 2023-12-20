@@ -304,7 +304,7 @@ def grabat(X,Z):
 
 def init_mycobot():
     global mycobot, coord_list
-    port = '/dev/Mycobot'
+    port = '/dev/Mycobot2'
     #mycobot = MyCobot('/dev/ttyUSB0')
     mycobot = MyCobot(port)
  
@@ -326,7 +326,7 @@ def init_mycobot():
 
 def checkConnection():
     while 1: # Loop to check connection
-        x = os.path.exists('/dev/Mycobot')
+        x = os.path.exists('/dev/Mycobot2')
         if x==1 :
             #print('connected')
             break
@@ -341,14 +341,14 @@ def thread_check_connection():
     Flag1 = False
     rospy.loginfo('initialized check thread')
     while 1:
-        y = os.path.exists('/dev/Mycobot')
+        y = os.path.exists('/dev/Mycobot2')
         if y != 1:
             if Flag1 == False:
                 subco.unregister()
                 Flag1 = True
             while 1:
                 rospy.loginfo('myCobot_Disconnected')    
-                check = os.path.exists('/dev/Mycobot')
+                check = os.path.exists('/dev/Mycobot2')
                 if check == 1:
                     rospy.loginfo('myCobot_Disconnected')    
                     init_mycobot()

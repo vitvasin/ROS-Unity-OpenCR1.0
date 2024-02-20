@@ -92,7 +92,7 @@ def sendPos():
     global e1,e2,e3
     rosmsg = Float32MultiArray()
     rosmsg.data = [0]*7
-    rosmsg.data = [float(e1.get()),float(e2.get()),float(e3.get()),0,1,0,0]
+    rosmsg.data = [float(e1.get()),float(e2.get()),float(e3.get()),1,1,0,0]
     pub.publish(rosmsg)
    # rosbool = Bool()
    # rosbool.data = True
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     window = Tk()
     window_component()
     rospy.init_node('command_publisher')
-    pub = rospy.Publisher("/rb_pos_direct",Float32MultiArray,queue_size=10)
+    pub = rospy.Publisher("/mycobotPos",Float32MultiArray,queue_size=10)
     pub2 = rospy.Publisher("/grip_ind",Bool,queue_size=10)
     pub3 = rospy.Publisher("/hand_trigger",Bool,queue_size=10)
     window.mainloop() 

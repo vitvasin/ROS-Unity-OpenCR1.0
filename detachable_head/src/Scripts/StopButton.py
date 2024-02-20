@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Float32MultiArray
-from Tkinter import *
+from tkinter import *
 
 msg = ""
 m1=NONE

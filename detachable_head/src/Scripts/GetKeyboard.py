@@ -28,7 +28,7 @@ def getkey():
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
-
+''''''
 def main():
     rospy.init_node('kb_node')
     kb_pub = rospy.Publisher("/key_pub",String,queue_size=1)
@@ -44,6 +44,8 @@ def main():
     except (KeyboardInterrupt, SystemExit):
         os.system('stty sane')
         print('stopping.')
+        ''''''
+        
         
 if __name__=='__main__':
     main()

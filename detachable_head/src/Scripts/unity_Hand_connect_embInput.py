@@ -78,6 +78,8 @@ def callback(array):
     #mycobot.send_coord(Coord.Z.value,y,80)
     
 def callback_embInput(tracker_input):
+    global  detached_flag
+    if detached_flag == True: return
     #assign input to the parameter/rearrange coordinate from Unity to ROS coordinate
     emb_x = -tracker_input.data[0]
     emb_y = -tracker_input.data[2]
@@ -94,9 +96,9 @@ def callback_embInput(tracker_input):
     coord_list = [0+emb_x,-180+emb_y,200+emb_z,0,180,0]
     #drive the robot
     mycobot.send_coords(coord_list, 100, 1)
-    #rospy.loginfo('Received_FROM_CONTROLLER:' + str(coord_list))
-    current_cord = mycobot.get_coords()
-    rospy.loginfo("current cord:" + str(current_cord))
+    rospy.loginfo('Received_FROM_CONTROLLER:' + str(coord_list))
+    #current_cord = mycobot.get_coords()
+    #rospy.loginfo("current cord:" + str(current_cord))
     
     
 def initialize_gripper():
@@ -111,14 +113,15 @@ def initialize_gripper():
     time.sleep(2)
 
 def mycobot_listenner() :
-    global mycobot, pub, subco
+    global mycobot, pub, subco, detached_flag
 
     #subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
     emb_input=rospy.Subscriber('/embInput', Float32MultiArray, callback_embInput,queue_size=1)
+    subco =emb_input
     #rospy.Subscriber('/grip_ind',Bool,callback_grip,queue_size=5)
     #rospy.Subscriber('/pad',Bool,callback_pad,queue_size=5)
     #rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
-    pub = rospy.Publisher('/mycobotCoords',Float32MultiArray,queue_size=1)
+    #pub = rospy.Publisher('/mycobotCoords',Float32MultiArray,queue_size=1)
     #Mycobot_Mapping_Position()
 
 
@@ -190,102 +193,6 @@ def MAP_CAL(dx,dy):
     return  out
 
 
-''' 
-def callback_grip(input):
-    global old, mycobot, pub, subco, x,z
-    y= input.data
-
-    if y == False:
-        mycobot.set_encoder(8,2000)
-    if y== True:
-        subco.unregister()
-        mycobot.set_encoder(8,600)
-        #grabat(x,z)
-        #time.sleep(0.5)
-        #mycobot.set_encoder(8,1500) 
-                  
-        subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
-
-def callback_pad(input):
-    global old, mycobot, pub, subco, x,z
-    initCoord = []
-    pad= input.data
-    if pad == True or pad == False:
-        subco.unregister() 
-    ##    mycobot.send_angle(Angle.J5.value,30,50)
-    #    time.sleep(3)
-    #    mycobot.send_angle(Angle.J5.value,15,50)
-        
-        mycobot.jog_angle(4,1,10)
-        time.sleep(1)
-        mycobot.jog_stop()
-            
-
-        subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
-
-def callback_JogUP(input):
-    global old, mycobot, pub, subco, x,z
-    initCoord = []
-    pad= input.data
-    if pad == True or pad == False:
-        subco.unregister()
-        while 1:
-            mycobot.jog_angle(5,0,50)
-            A= mycobot.get_angles()
-            if A[4] > 15: 
-                mycobot.jog_stop()
-                break
-
-        subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
-
-def callback_JogDown(input):
-    global old, mycobot, pub, subco, x,z
-    initCoord = []
-    pad= input.data
-    if pad == True or pad == False:
-        subco.unregister()
-        mycobot.jog_angle(5,1,50)
-        subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
-
-def grabat(X,Z):
-   # if os.path.exists('/dev/Mycobot') != 1:
-   #     print('received command but myCobot unavailable')
-   #     return
-  #  if math.sqrt(X**2+Z**2) > 280:
-  #      mycobot.set_color(255, 255, 0)
-   #     return
-    #Z+=17
-
-    if Z>-120: Z= -120
-    if Z<-280: Z= -280
-    #X+=10
-    if X>270: X= 270
-    if X<-270: X= -270
-    mycobot.set_color(0, 0, 255)
-    rx= 0
-    # POS 1 AIM
-    coord_list = [X, Z, 280,rx,0,0] #x,y,z correct
-    rospy.loginfo('Received:' + str(coord_list))
-    mycobot.send_coords(coord_list, 30, 1)
-
-    #POS 1 getDown
-    time.sleep(2)
-    coord_list = [X, Z, 190,rx,0,0] #x,y,z correct
-    #rospy.loginfo('Received:' + str(coord_list))
-    mycobot.send_coords(coord_list, 50, 1)
-
-    #POS 1 catch
-    time.sleep(2)
-    mycobot.set_encoder(8,600)
-
-    #POS 1 getUp
-    time.sleep(2)
-    coord_list = [X, Z, 280,rx,0,0] #x,y,z correct
-    #rospy.loginfo('Received:' + str(coord_list))
-    mycobot.send_coords(coord_list, 50, 1)
-        
-'''
-
 def init_mycobot():
     global mycobot
     reset = [0, 0, 0, 0, 0, 0]
@@ -322,22 +229,26 @@ def checkConnection():
 
 
 def thread_check_connection():
-    global subco
+    global subco, detached_flag
     Flag1 = False
+    detached_flag = False
     rospy.loginfo('initialized check thread')
     while 1:
         y = os.path.exists('/dev/Mycobot2')
+        detached_flag = False
         if y != 1:
             if Flag1 == False:
                 subco.unregister()
                 Flag1 = True
             while 1:
-                rospy.loginfo('myCobot_Disconnected')    
+                rospy.loginfo('myCobot_Disconnected')  
+                detached_flag = True  
                 check = os.path.exists('/dev/Mycobot2')
                 if check == 1:
                     rospy.loginfo('myCobot_Disconnected')    
                     init_mycobot()
-                    subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
+                    #subco=rospy.Subscriber('/mycobotPos', Float32MultiArray, callback,queue_size=1)
+                    subco=rospy.Subscriber('/embInput', Float32MultiArray, callback_embInput,queue_size=1)
                     break
                 if t_flag == True: break
                 time.sleep(0.3)
@@ -353,6 +264,7 @@ def shutdown_hook():
     reset = [0, 0, 0, 0, 0, 0]
     mycobot.send_angles(reset, 30)
     mycobot.set_color(255, 0, 0)  # Optionally set color to indicate shutdown
+    mycobot.stop()
     rospy.loginfo("Shutdown complete.")
 
 
@@ -360,7 +272,7 @@ if __name__ == '__main__':
     global mycobot, t_flag
     t_flag = False
     rospy.init_node('hand_node')
-    rospy.on_shutdown(shutdown_hook)  # Register shutdown hook
+    #rospy.on_shutdown(shutdown_hook)  # Register shutdown hook
     rospy.loginfo('initialized arm node')
     
     t1= threading.Thread(target=thread_check_connection, name = 't1')
@@ -375,10 +287,12 @@ if __name__ == '__main__':
     #t2.join()
     t1.start() # start checking serial thread
     mycobot_listenner() 
-    ''' 
-    t_flag = True # execute when leave the program
-    
-    mycobot.set_color(255, 0, 0) 
-    '''
+    rospy.loginfo("Shutting down MyCobot node...")
+    t_flag = True  # Signal to threads to stop
+    #mycobot.release_all_servos()  # Release servos
+    reset = [0, 0, 0, 0, 0, 0]
+    mycobot.send_angles(reset, 30)
+    mycobot.set_color(255, 0, 0)  # Optionally set color to indicate shutdown
+    rospy.loginfo("Shutdown complete.")
 
     

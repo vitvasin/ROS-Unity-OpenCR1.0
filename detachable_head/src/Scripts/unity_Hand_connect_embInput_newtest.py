@@ -40,10 +40,10 @@ def initialize_mycobot():
     mycobot.set_color(255, 255, 255)
     time.sleep(2)
     mycobot.send_angles(reset,30)
-    rx=0
+    rx=8
     ry=180
     rz=0
-    coord_list = [0, -180, 200, rx, ry, rz] # Home
+    coord_list = [-55, -160, 200, rx, ry, rz] # Home
     #coord_list = [-50, -180, 280, 0] # Home
     time.sleep(2)
     rospy.loginfo(rospy.get_caller_id()+"I heard %s",coord_list)
@@ -68,12 +68,12 @@ def callback_embInput(tracker_input):
     
     #assign to input matrix
     coord_list_emb = [emb_x, emb_y, emb_z] #x,y,z correct
-    coord_list_default = [0, -180, 250] 
+    coord_list_default = [-45, -187, 250] 
     #cal_coord = coord_list_emb+coord_list_default
     
-    coord_list = [0+emb_x,-180+emb_y,200+emb_z,0,180,0]
+    coord_list = [-55+emb_x,-160+emb_y,180+emb_z,8,180,0]
     #drive the robot
-    mycobot.send_coords(coord_list, 100, 1)
+    mycobot.send_coords(coord_list, 50, 1)
     rospy.loginfo('Received_FROM_CONTROLLER:' + str(coord_list))
     #current_cord = mycobot.get_coords()
     #rospy.loginfo("current cord:" + str(current_cord))
@@ -83,8 +83,8 @@ def callback_embInput(tracker_input):
 def listen_to_ros_topic():
     global subco
     #rospy.Subscriber("mycobot_commands", String, mycobot_command_callback)
-    subco=rospy.Subscriber('/embInput', Float32MultiArray, callback_embInput)
-    rospy.loginfo("Inlistening")
+    subco=rospy.Subscriber('/embInput', Float32MultiArray, callback_embInput,queue_size=1)
+    #rospy.loginfo("Inlistening")
     rospy.spin()
 
 def check_mycobot_connection(device_path):
